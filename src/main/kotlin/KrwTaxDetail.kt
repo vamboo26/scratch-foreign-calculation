@@ -1,5 +1,4 @@
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Suppress("JoinDeclarationAndAssignment")
 sealed interface KrwTaxDetail {
@@ -26,14 +25,11 @@ sealed interface KrwTaxDetail {
          */
         init {
             krwTotalPayment =
-                foreignTaxDetail.foreignTotalPayment.multiply(foreignTaxDetail.exchangeRate)
-                    .setScaleWithRoundingHalfUp(0)
+                foreignTaxDetail.foreignTotalPayment.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiply(foreignTaxDetail.exchangeRate)
-                .setScaleWithRoundingHalfUp(0)
+            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwResidentTax = foreignTaxDetail.foreignResidentTax.multiply(foreignTaxDetail.exchangeRate)
-                .setScaleWithRoundingHalfUp(0)
+            krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
             krwNetPayment = krwTotalPayment.subtract(krwIncomeTax).subtract(krwResidentTax)
 
@@ -56,22 +52,15 @@ sealed interface KrwTaxDetail {
          * Payer 유형은 외화 `순`지급액을 기초로 하는 원화 `순`지급액 및 세금을 바탕으로 원화 `총`지급액을 계산한다.
          */
         init {
-            krwNetPayment = foreignTaxDetail.foreignNetPayment.multiply(foreignTaxDetail.exchangeRate)
-                .setScaleWithRoundingHalfUp(0)
+            krwNetPayment = foreignTaxDetail.foreignNetPayment.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiply(foreignTaxDetail.exchangeRate)
-                .setScaleWithRoundingHalfUp(0)
+            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwResidentTax = foreignTaxDetail.foreignResidentTax.multiply(foreignTaxDetail.exchangeRate)
-                .setScaleWithRoundingHalfUp(0)
+            krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
             krwTotalPayment = krwNetPayment.add(krwIncomeTax).add(krwResidentTax)
 
             currencyTranslationProfit = krwNetPayment.subtract(krwRoundedNeighboringCopyrightFee)
         }
     }
-}
-
-private fun BigDecimal.setScaleWithRoundingHalfUp(scale: Int): BigDecimal {
-    return this.setScale(scale, RoundingMode.HALF_UP)
 }

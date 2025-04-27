@@ -1,12 +1,11 @@
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Suppress("JoinDeclarationAndAssignment")
 sealed interface ForeignTaxDetail {
 
     companion object {
-        private val INCOME_TAX_DIVISOR = BigDecimal(1.1)
-        private val RESIDENT_TAX_MULTIPLIER = BigDecimal(0.1)
+        private val INCOME_TAX_DIVISOR = BigDecimal("1.1")
+        private val RESIDENT_TAX_MULTIPLIER = BigDecimal("0.1")
     }
 
     val currency: String
@@ -24,7 +23,7 @@ sealed interface ForeignTaxDetail {
         withholdingTaxRate: BigDecimal,
     ) : ForeignTaxDetail {
 
-        private val foreignAmountScaleByCurrency = if (currency == "JPY") 0 else 2
+        private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: BigDecimal
         override val foreignIncomeTax: BigDecimal
@@ -35,14 +34,13 @@ sealed interface ForeignTaxDetail {
          * Payee 유형은 원화 인접권료를 기초로 외화 `총`지급액을 먼저 계산하고, 순차적으로 외화 세금과 외화 순지급액을 계산한다.
          */
         init {
-            foreignTotalPayment =
-                krwRoundedNrFee.divide(exchangeRate, foreignAmountScaleByCurrency, RoundingMode.HALF_UP)
+            foreignTotalPayment = krwRoundedNrFee.divideWithScale(exchangeRate, scale)
 
-            foreignIncomeTax = foreignTotalPayment.multiply(withholdingTaxRate)
-                .divide(INCOME_TAX_DIVISOR, foreignAmountScaleByCurrency, RoundingMode.HALF_UP)
+            foreignIncomeTax = foreignTotalPayment
+                .multiplyWithScale(withholdingTaxRate, scale)
+                .divideWithScale(INCOME_TAX_DIVISOR, scale)
 
-            foreignResidentTax = foreignIncomeTax.multiply(RESIDENT_TAX_MULTIPLIER)
-                .setScaleWithRoundingHalfUp(foreignAmountScaleByCurrency)
+            foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
             foreignNetPayment = foreignTotalPayment.subtract(foreignIncomeTax).subtract(foreignResidentTax)
         }
@@ -55,7 +53,11 @@ sealed interface ForeignTaxDetail {
         krwRoundedNrFee: BigDecimal,
     ) : ForeignTaxDetail {
 
-        private val foreignAmountScaleByCurrency = if (currency == "JPY") 0 else 2
+        companion object {
+            private val WITHHOLDING_TAX_DIVISOR = BigDecimal("0.85")
+        }
+
+        private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: BigDecimal
         override val foreignIncomeTax: BigDecimal
@@ -66,27 +68,18 @@ sealed interface ForeignTaxDetail {
          * Payer 유형은 원화 인접권료를 기초로 외화 `순`지급액을 먼저 계산하고, 외화 세금과 외화 총지급액을 역산한다.
          */
         init {
-            foreignNetPayment = krwRoundedNrFee.divide(exchangeRate, foreignAmountScaleByCurrency, RoundingMode.HALF_UP)
+            foreignNetPayment = krwRoundedNrFee.divideWithScale(exchangeRate, scale)
 
-            val foreignWithHoldingTax: BigDecimal =
-                foreignNetPayment.divide(BigDecimal(0.85), foreignAmountScaleByCurrency, RoundingMode.HALF_UP)
-                    .subtract(foreignNetPayment)
+            val foreignWithHoldingTax = foreignNetPayment
+                .divideWithScale(WITHHOLDING_TAX_DIVISOR, scale)
+                .subtract(foreignNetPayment)
 
-            foreignIncomeTax = foreignWithHoldingTax.divide(
-                INCOME_TAX_DIVISOR,
-                foreignAmountScaleByCurrency,
-                RoundingMode.HALF_UP
-            )
+            foreignIncomeTax = foreignWithHoldingTax.divideWithScale(INCOME_TAX_DIVISOR, scale)
 
-            foreignResidentTax = foreignIncomeTax.multiply(RESIDENT_TAX_MULTIPLIER)
-                .setScaleWithRoundingHalfUp(foreignAmountScaleByCurrency)
+            foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
             foreignTotalPayment = foreignNetPayment.add(foreignIncomeTax).add(foreignResidentTax)
         }
     }
-}
-
-private fun BigDecimal.setScaleWithRoundingHalfUp(scale: Int): BigDecimal {
-    return this.setScale(scale, RoundingMode.HALF_UP)
 }
 
