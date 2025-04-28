@@ -1,3 +1,7 @@
+package domain
+
+import Input
+import Output
 import java.math.RoundingMode
 
 sealed interface TaxCalculator {

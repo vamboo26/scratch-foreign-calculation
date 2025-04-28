@@ -1,3 +1,5 @@
+package domain
+
 enum class CurrencyScale(
     val scale: Int,
 ) {

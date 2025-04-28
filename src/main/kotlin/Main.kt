@@ -1,3 +1,5 @@
+import domain.TaxCalculator
+import domain.WithholdingTaxBurdenType
 import java.math.BigDecimal
 
 data class Input(

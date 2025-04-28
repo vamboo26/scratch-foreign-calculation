@@ -1,3 +1,5 @@
+package domain
+
 enum class WithholdingTaxBurdenType {
     PAYEE,
     PAYER,
