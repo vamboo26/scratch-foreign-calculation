@@ -18,11 +18,11 @@ value class KrwTotalPayment private constructor(
         }
 
         fun payer(
-            krwNetPayment: BigDecimal,
-            krwIncomeTax: BigDecimal,
-            krwResidentTax: BigDecimal,
+            krwNetPayment: KrwNetPayment,
+            krwIncomeTax: KrwIncomeTax,
+            krwResidentTax: KrwResidentTax,
         ): KrwTotalPayment {
-            return KrwTotalPayment(krwNetPayment + krwIncomeTax + krwResidentTax)
+            return KrwTotalPayment(krwNetPayment.value + krwIncomeTax.value + krwResidentTax.value)
         }
     }
 }

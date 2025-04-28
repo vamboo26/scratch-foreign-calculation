@@ -65,7 +65,7 @@ sealed interface KrwTaxDetail {
             krwResidentTax =
                 KrwResidentTax.calculate(foreignTaxDetail.foreignResidentTax, foreignTaxDetail.exchangeRate)
 
-            krwTotalPayment = KrwTotalPayment.payer(krwNetPayment.value, krwIncomeTax.value, krwResidentTax.value)
+            krwTotalPayment = KrwTotalPayment.payer(krwNetPayment, krwIncomeTax, krwResidentTax)
 
             currencyTranslationProfit = krwNetPayment.value - krwRoundedNeighboringCopyrightFee
         }
