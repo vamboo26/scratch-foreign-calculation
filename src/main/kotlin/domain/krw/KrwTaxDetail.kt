@@ -1,7 +1,6 @@
-package domain
+package domain.krw
 
 import domain.foreign.ForeignTaxDetail
-import domain.krw.*
 import java.math.BigDecimal
 
 @Suppress("JoinDeclarationAndAssignment")

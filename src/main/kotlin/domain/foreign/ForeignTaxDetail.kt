@@ -14,14 +14,15 @@ sealed interface ForeignTaxDetail {
     val foreignResidentTax: ForeignResidentTax
     val foreignNetPayment: ForeignNetPayment
 
+    val scale: Int
+        get() = CurrencyScale.fromCurrency(currency).scale
+
     class PayeeForeignTaxDetail(
         override val currency: String,
         override val exchangeRate: BigDecimal,
         krwRoundedNrFee: BigDecimal,
         withholdingTaxRate: BigDecimal,
     ) : ForeignTaxDetail {
-
-        private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: ForeignTotalPayment
         override val foreignIncomeTax: ForeignIncomeTax
@@ -47,8 +48,6 @@ sealed interface ForeignTaxDetail {
         override val exchangeRate: BigDecimal,
         krwRoundedNrFee: BigDecimal,
     ) : ForeignTaxDetail {
-
-        private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: ForeignTotalPayment
         override val foreignIncomeTax: ForeignIncomeTax

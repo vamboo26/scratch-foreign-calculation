@@ -3,6 +3,7 @@ package domain
 import Input
 import Output
 import domain.foreign.ForeignTaxDetail
+import domain.krw.KrwTaxDetail
 import java.math.RoundingMode
 
 sealed interface TaxCalculator {
