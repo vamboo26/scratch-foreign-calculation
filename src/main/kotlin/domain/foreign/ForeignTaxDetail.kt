@@ -2,22 +2,17 @@ package domain.foreign
 
 import domain.CurrencyScale
 import domain.divideWithScale
-import domain.multiplyWithScale
 import java.math.BigDecimal
 
 @Suppress("JoinDeclarationAndAssignment")
 sealed interface ForeignTaxDetail {
-
-    companion object {
-        private val RESIDENT_TAX_MULTIPLIER = BigDecimal("0.1")
-    }
 
     val currency: String
     val exchangeRate: BigDecimal
 
     val foreignTotalPayment: ForeignTotalPayment
     val foreignIncomeTax: ForeignIncomeTax
-    val foreignResidentTax: BigDecimal
+    val foreignResidentTax: ForeignResidentTax
     val foreignNetPayment: BigDecimal
 
     class PayeeForeignTaxDetail(
@@ -31,7 +26,7 @@ sealed interface ForeignTaxDetail {
 
         override val foreignTotalPayment: ForeignTotalPayment
         override val foreignIncomeTax: ForeignIncomeTax
-        override val foreignResidentTax: BigDecimal
+        override val foreignResidentTax: ForeignResidentTax
         override val foreignNetPayment: BigDecimal
 
         /**
@@ -46,9 +41,9 @@ sealed interface ForeignTaxDetail {
                 scale,
             )
 
-            foreignResidentTax = foreignIncomeTax.value.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
+            foreignResidentTax = ForeignResidentTax.calculate(foreignIncomeTax, scale)
 
-            foreignNetPayment = foreignTotalPayment.value - foreignIncomeTax.value - foreignResidentTax
+            foreignNetPayment = foreignTotalPayment.value - foreignIncomeTax.value - foreignResidentTax.value
         }
     }
 
@@ -66,7 +61,7 @@ sealed interface ForeignTaxDetail {
 
         override val foreignTotalPayment: ForeignTotalPayment
         override val foreignIncomeTax: ForeignIncomeTax
-        override val foreignResidentTax: BigDecimal
+        override val foreignResidentTax: ForeignResidentTax
         override val foreignNetPayment: BigDecimal
 
         /**
@@ -84,10 +79,10 @@ sealed interface ForeignTaxDetail {
                 scale,
             )
 
-            foreignResidentTax = foreignIncomeTax.value.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
+            foreignResidentTax = ForeignResidentTax.calculate(foreignIncomeTax, scale)
 
             foreignTotalPayment =
-                ForeignTotalPayment.payer(foreignNetPayment, foreignIncomeTax.value, foreignResidentTax)
+                ForeignTotalPayment.payer(foreignNetPayment, foreignIncomeTax.value, foreignResidentTax.value)
         }
     }
 }
