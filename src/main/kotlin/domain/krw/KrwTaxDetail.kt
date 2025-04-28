@@ -1,10 +1,6 @@
 package domain
 
-import domain.krw.CurrencyTranslationProfit
-import domain.krw.KrwIncomeTax
-import domain.krw.KrwNetPayment
-import domain.krw.KrwResidentTax
-import domain.krw.KrwTotalPayment
+import domain.krw.*
 import java.math.BigDecimal
 
 @Suppress("JoinDeclarationAndAssignment")
@@ -14,7 +10,7 @@ sealed interface KrwTaxDetail {
     val krwIncomeTax: KrwIncomeTax
     val krwResidentTax: KrwResidentTax
     val krwNetPayment: KrwNetPayment
-    val currencyTranslationProfit: CurrencyTranslationProfit
+    val currencyTranslationProfitAndLoss: CurrencyTranslationProfitAndLoss
 
     class PayeeKrwTaxDetail(
         foreignTaxDetail: ForeignTaxDetail.PayeeForeignTaxDetail,
@@ -25,7 +21,7 @@ sealed interface KrwTaxDetail {
         override val krwIncomeTax: KrwIncomeTax
         override val krwResidentTax: KrwResidentTax
         override val krwNetPayment: KrwNetPayment
-        override val currencyTranslationProfit: CurrencyTranslationProfit
+        override val currencyTranslationProfitAndLoss: CurrencyTranslationProfitAndLoss
 
         /**
          * Payee 유형은 외화 `총`지급액을 기초로 하는 원화 `총`지급액 및 세금을 바탕으로 원화 `순`지급액을 계산한다.
@@ -40,7 +36,8 @@ sealed interface KrwTaxDetail {
 
             krwNetPayment = KrwNetPayment.payee(krwTotalPayment, krwIncomeTax, krwResidentTax)
 
-            currencyTranslationProfit = CurrencyTranslationProfit.payee(krwTotalPayment, krwRoundedNeighboringCopyrightFee)
+            currencyTranslationProfitAndLoss =
+                CurrencyTranslationProfitAndLoss.payee(krwTotalPayment, krwRoundedNeighboringCopyrightFee)
         }
     }
 
@@ -53,7 +50,7 @@ sealed interface KrwTaxDetail {
         override val krwIncomeTax: KrwIncomeTax
         override val krwResidentTax: KrwResidentTax
         override val krwNetPayment: KrwNetPayment
-        override val currencyTranslationProfit: CurrencyTranslationProfit
+        override val currencyTranslationProfitAndLoss: CurrencyTranslationProfitAndLoss
 
         /**
          * Payer 유형은 외화 `순`지급액을 기초로 하는 원화 `순`지급액 및 세금을 바탕으로 원화 `총`지급액을 계산한다.
@@ -68,7 +65,8 @@ sealed interface KrwTaxDetail {
 
             krwTotalPayment = KrwTotalPayment.payer(krwNetPayment, krwIncomeTax, krwResidentTax)
 
-            currencyTranslationProfit = CurrencyTranslationProfit.payer(krwNetPayment, krwRoundedNeighboringCopyrightFee)
+            currencyTranslationProfitAndLoss =
+                CurrencyTranslationProfitAndLoss.payer(krwNetPayment, krwRoundedNeighboringCopyrightFee)
         }
     }
 }
