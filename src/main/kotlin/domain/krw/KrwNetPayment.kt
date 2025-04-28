@@ -1,5 +1,6 @@
 package domain.krw
 
+import domain.foreign.ForeignNetPayment
 import domain.krw.KrwConstants.KRW_DECIMAL_SCALE
 import domain.multiplyWithScale
 import java.math.BigDecimal
@@ -21,10 +22,10 @@ value class KrwNetPayment private constructor(
         }
 
         fun payer(
-            foreignNetPayment: BigDecimal,
+            foreignNetPayment: ForeignNetPayment,
             exchangeRate: BigDecimal,
         ): KrwNetPayment {
-            return KrwNetPayment(foreignNetPayment.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
+            return KrwNetPayment(foreignNetPayment.value.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
         }
     }
 }
