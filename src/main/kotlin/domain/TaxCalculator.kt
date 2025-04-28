@@ -38,7 +38,7 @@ sealed interface TaxCalculator {
                 krwTaxDetail.krwTotalPayment.value,
                 krwTaxDetail.krwIncomeTax.value,
                 krwTaxDetail.krwResidentTax.value,
-                krwTaxDetail.krwNetPayment,
+                krwTaxDetail.krwNetPayment.value,
             )
         }
     }
@@ -72,7 +72,7 @@ sealed interface TaxCalculator {
                 krwTaxDetail.krwTotalPayment.value,
                 krwTaxDetail.krwIncomeTax.value,
                 krwTaxDetail.krwResidentTax.value,
-                krwTaxDetail.krwNetPayment,
+                krwTaxDetail.krwNetPayment.value,
             )
         }
     }
