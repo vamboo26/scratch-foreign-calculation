@@ -1,5 +1,6 @@
 package domain.krw
 
+import domain.foreign.ForeignIncomeTax
 import domain.krw.KrwConstants.KRW_DECIMAL_SCALE
 import domain.multiplyWithScale
 import java.math.BigDecimal
@@ -11,10 +12,10 @@ value class KrwIncomeTax private constructor(
 
     companion object {
         fun calculate(
-            foreignIncomeTax: BigDecimal,
+            foreignIncomeTax: ForeignIncomeTax,
             exchangeRate: BigDecimal,
         ): KrwIncomeTax {
-            return KrwIncomeTax(foreignIncomeTax.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
+            return KrwIncomeTax(foreignIncomeTax.value.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
         }
     }
 }

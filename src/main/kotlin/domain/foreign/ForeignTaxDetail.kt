@@ -9,7 +9,6 @@ import java.math.BigDecimal
 sealed interface ForeignTaxDetail {
 
     companion object {
-        private val INCOME_TAX_DIVISOR = BigDecimal("1.1")
         private val RESIDENT_TAX_MULTIPLIER = BigDecimal("0.1")
     }
 
@@ -17,7 +16,7 @@ sealed interface ForeignTaxDetail {
     val exchangeRate: BigDecimal
 
     val foreignTotalPayment: ForeignTotalPayment
-    val foreignIncomeTax: BigDecimal
+    val foreignIncomeTax: ForeignIncomeTax
     val foreignResidentTax: BigDecimal
     val foreignNetPayment: BigDecimal
 
@@ -31,7 +30,7 @@ sealed interface ForeignTaxDetail {
         private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: ForeignTotalPayment
-        override val foreignIncomeTax: BigDecimal
+        override val foreignIncomeTax: ForeignIncomeTax
         override val foreignResidentTax: BigDecimal
         override val foreignNetPayment: BigDecimal
 
@@ -41,13 +40,15 @@ sealed interface ForeignTaxDetail {
         init {
             foreignTotalPayment = ForeignTotalPayment.payee(krwRoundedNrFee, exchangeRate, scale)
 
-            foreignIncomeTax = foreignTotalPayment.value
-                .multiplyWithScale(withholdingTaxRate, scale)
-                .divideWithScale(INCOME_TAX_DIVISOR, scale)
+            foreignIncomeTax = ForeignIncomeTax.payee(
+                foreignTotalPayment,
+                withholdingTaxRate,
+                scale,
+            )
 
-            foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
+            foreignResidentTax = foreignIncomeTax.value.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
-            foreignNetPayment = foreignTotalPayment.value - foreignIncomeTax - foreignResidentTax
+            foreignNetPayment = foreignTotalPayment.value - foreignIncomeTax.value - foreignResidentTax
         }
     }
 
@@ -64,7 +65,7 @@ sealed interface ForeignTaxDetail {
         private val scale = CurrencyScale.fromCurrency(currency).scale
 
         override val foreignTotalPayment: ForeignTotalPayment
-        override val foreignIncomeTax: BigDecimal
+        override val foreignIncomeTax: ForeignIncomeTax
         override val foreignResidentTax: BigDecimal
         override val foreignNetPayment: BigDecimal
 
@@ -78,11 +79,15 @@ sealed interface ForeignTaxDetail {
 
             val foreignWithholdingTax = foreignPaymentBeforeTax - foreignNetPayment
 
-            foreignIncomeTax = foreignWithholdingTax.divideWithScale(INCOME_TAX_DIVISOR, scale)
+            foreignIncomeTax = ForeignIncomeTax.payer(
+                foreignWithholdingTax,
+                scale,
+            )
 
-            foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
+            foreignResidentTax = foreignIncomeTax.value.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
-            foreignTotalPayment = ForeignTotalPayment.payer(foreignNetPayment, foreignIncomeTax, foreignResidentTax)
+            foreignTotalPayment =
+                ForeignTotalPayment.payer(foreignNetPayment, foreignIncomeTax.value, foreignResidentTax)
         }
     }
 }
