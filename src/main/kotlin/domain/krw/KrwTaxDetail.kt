@@ -1,11 +1,12 @@
 package domain
 
+import domain.krw.KrwTotalPayment
 import java.math.BigDecimal
 
 @Suppress("JoinDeclarationAndAssignment")
 sealed interface KrwTaxDetail {
 
-    val krwTotalPayment: BigDecimal
+    val krwTotalPayment: KrwTotalPayment
     val krwIncomeTax: BigDecimal
     val krwResidentTax: BigDecimal
     val krwNetPayment: BigDecimal
@@ -16,7 +17,7 @@ sealed interface KrwTaxDetail {
         krwRoundedNeighboringCopyrightFee: BigDecimal,
     ) : KrwTaxDetail {
 
-        override val krwTotalPayment: BigDecimal
+        override val krwTotalPayment: KrwTotalPayment
         override val krwIncomeTax: BigDecimal
         override val krwResidentTax: BigDecimal
         override val krwNetPayment: BigDecimal
@@ -26,16 +27,15 @@ sealed interface KrwTaxDetail {
          * Payee 유형은 외화 `총`지급액을 기초로 하는 원화 `총`지급액 및 세금을 바탕으로 원화 `순`지급액을 계산한다.
          */
         init {
-            krwTotalPayment =
-                foreignTaxDetail.foreignTotalPayment.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
+            krwTotalPayment = KrwTotalPayment.payee(foreignTaxDetail.foreignTotalPayment, foreignTaxDetail.exchangeRate)
 
             krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwNetPayment = krwTotalPayment - krwIncomeTax - krwResidentTax
+            krwNetPayment = krwTotalPayment.value - krwIncomeTax - krwResidentTax
 
-            currencyTranslationProfit = krwTotalPayment - krwRoundedNeighboringCopyrightFee
+            currencyTranslationProfit = krwTotalPayment.value - krwRoundedNeighboringCopyrightFee
         }
     }
 
@@ -44,7 +44,7 @@ sealed interface KrwTaxDetail {
         krwRoundedNeighboringCopyrightFee: BigDecimal,
     ) : KrwTaxDetail {
 
-        override val krwTotalPayment: BigDecimal
+        override val krwTotalPayment: KrwTotalPayment
         override val krwIncomeTax: BigDecimal
         override val krwResidentTax: BigDecimal
         override val krwNetPayment: BigDecimal
@@ -60,7 +60,7 @@ sealed interface KrwTaxDetail {
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwTotalPayment = krwNetPayment + krwIncomeTax + krwResidentTax
+            krwTotalPayment = KrwTotalPayment.payer(krwNetPayment, krwIncomeTax, krwResidentTax)
 
             currencyTranslationProfit = krwNetPayment - krwRoundedNeighboringCopyrightFee
         }
