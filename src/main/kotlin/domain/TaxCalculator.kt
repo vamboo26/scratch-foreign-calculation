@@ -2,6 +2,7 @@ package domain
 
 import Input
 import Output
+import domain.foreign.ForeignTaxDetail
 import java.math.RoundingMode
 
 sealed interface TaxCalculator {
@@ -29,7 +30,7 @@ sealed interface TaxCalculator {
                 summary.nation,
                 summary.withholdingTaxBurdenType,
                 summary.withholdingTaxRate,
-                foreignTaxDetail.foreignTotalPayment,
+                foreignTaxDetail.foreignTotalPayment.value,
                 foreignTaxDetail.foreignIncomeTax,
                 foreignTaxDetail.foreignResidentTax,
                 foreignTaxDetail.foreignNetPayment,
@@ -63,7 +64,7 @@ sealed interface TaxCalculator {
                 summary.nation,
                 summary.withholdingTaxBurdenType,
                 summary.withholdingTaxRate,
-                foreignTaxDetail.foreignTotalPayment,
+                foreignTaxDetail.foreignTotalPayment.value,
                 foreignTaxDetail.foreignIncomeTax,
                 foreignTaxDetail.foreignResidentTax,
                 foreignTaxDetail.foreignNetPayment,

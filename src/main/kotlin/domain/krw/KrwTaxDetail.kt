@@ -1,5 +1,6 @@
 package domain
 
+import domain.foreign.ForeignTaxDetail
 import domain.krw.*
 import java.math.BigDecimal
 

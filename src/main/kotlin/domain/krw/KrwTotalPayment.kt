@@ -1,5 +1,6 @@
 package domain.krw
 
+import domain.foreign.ForeignTotalPayment
 import domain.krw.KrwConstants.KRW_DECIMAL_SCALE
 import domain.multiplyWithScale
 import java.math.BigDecimal
@@ -11,10 +12,10 @@ value class KrwTotalPayment private constructor(
 
     companion object {
         fun payee(
-            foreignTotalPayment: BigDecimal,
+            foreignTotalPayment: ForeignTotalPayment,
             exchangeRate: BigDecimal,
         ): KrwTotalPayment {
-            return KrwTotalPayment(foreignTotalPayment.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
+            return KrwTotalPayment(foreignTotalPayment.value.multiplyWithScale(exchangeRate, KRW_DECIMAL_SCALE))
         }
 
         fun payer(
