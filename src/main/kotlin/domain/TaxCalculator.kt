@@ -36,7 +36,7 @@ sealed interface TaxCalculator {
                 krwTaxDetail.currencyTranslationProfit.toInt(),
                 krwRoundedNrFee,
                 krwTaxDetail.krwTotalPayment.value,
-                krwTaxDetail.krwIncomeTax,
+                krwTaxDetail.krwIncomeTax.value,
                 krwTaxDetail.krwResidentTax,
                 krwTaxDetail.krwNetPayment,
             )
@@ -70,7 +70,7 @@ sealed interface TaxCalculator {
                 krwTaxDetail.currencyTranslationProfit.toInt(),
                 krwRoundedNrFee,
                 krwTaxDetail.krwTotalPayment.value,
-                krwTaxDetail.krwIncomeTax,
+                krwTaxDetail.krwIncomeTax.value,
                 krwTaxDetail.krwResidentTax,
                 krwTaxDetail.krwNetPayment,
             )

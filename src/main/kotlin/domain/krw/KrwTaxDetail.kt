@@ -1,5 +1,6 @@
 package domain
 
+import domain.krw.KrwIncomeTax
 import domain.krw.KrwTotalPayment
 import java.math.BigDecimal
 
@@ -7,7 +8,7 @@ import java.math.BigDecimal
 sealed interface KrwTaxDetail {
 
     val krwTotalPayment: KrwTotalPayment
-    val krwIncomeTax: BigDecimal
+    val krwIncomeTax: KrwIncomeTax
     val krwResidentTax: BigDecimal
     val krwNetPayment: BigDecimal
     val currencyTranslationProfit: BigDecimal
@@ -18,7 +19,7 @@ sealed interface KrwTaxDetail {
     ) : KrwTaxDetail {
 
         override val krwTotalPayment: KrwTotalPayment
-        override val krwIncomeTax: BigDecimal
+        override val krwIncomeTax: KrwIncomeTax
         override val krwResidentTax: BigDecimal
         override val krwNetPayment: BigDecimal
         override val currencyTranslationProfit: BigDecimal
@@ -29,11 +30,11 @@ sealed interface KrwTaxDetail {
         init {
             krwTotalPayment = KrwTotalPayment.payee(foreignTaxDetail.foreignTotalPayment, foreignTaxDetail.exchangeRate)
 
-            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
+            krwIncomeTax = KrwIncomeTax.calculate(foreignTaxDetail.foreignIncomeTax, foreignTaxDetail.exchangeRate)
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwNetPayment = krwTotalPayment.value - krwIncomeTax - krwResidentTax
+            krwNetPayment = krwTotalPayment.value - krwIncomeTax.value - krwResidentTax
 
             currencyTranslationProfit = krwTotalPayment.value - krwRoundedNeighboringCopyrightFee
         }
@@ -45,7 +46,7 @@ sealed interface KrwTaxDetail {
     ) : KrwTaxDetail {
 
         override val krwTotalPayment: KrwTotalPayment
-        override val krwIncomeTax: BigDecimal
+        override val krwIncomeTax: KrwIncomeTax
         override val krwResidentTax: BigDecimal
         override val krwNetPayment: BigDecimal
         override val currencyTranslationProfit: BigDecimal
@@ -56,11 +57,11 @@ sealed interface KrwTaxDetail {
         init {
             krwNetPayment = foreignTaxDetail.foreignNetPayment.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwIncomeTax = foreignTaxDetail.foreignIncomeTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
+            krwIncomeTax = KrwIncomeTax.calculate(foreignTaxDetail.foreignIncomeTax, foreignTaxDetail.exchangeRate)
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwTotalPayment = KrwTotalPayment.payer(krwNetPayment, krwIncomeTax, krwResidentTax)
+            krwTotalPayment = KrwTotalPayment.payer(krwNetPayment, krwIncomeTax.value, krwResidentTax)
 
             currencyTranslationProfit = krwNetPayment - krwRoundedNeighboringCopyrightFee
         }
