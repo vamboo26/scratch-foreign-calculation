@@ -1,7 +1,6 @@
 package domain.foreign
 
 import domain.CurrencyScale
-import domain.divideWithScale
 import java.math.BigDecimal
 
 @Suppress("JoinDeclarationAndAssignment")
@@ -35,11 +34,7 @@ sealed interface ForeignTaxDetail {
         init {
             foreignTotalPayment = ForeignTotalPayment.payee(krwRoundedNrFee, exchangeRate, scale)
 
-            foreignIncomeTax = ForeignIncomeTax.payee(
-                foreignTotalPayment,
-                withholdingTaxRate,
-                scale,
-            )
+            foreignIncomeTax = ForeignIncomeTax.payee(foreignTotalPayment, withholdingTaxRate, scale)
 
             foreignResidentTax = ForeignResidentTax.calculate(foreignIncomeTax, scale)
 
@@ -52,10 +47,6 @@ sealed interface ForeignTaxDetail {
         override val exchangeRate: BigDecimal,
         krwRoundedNrFee: BigDecimal,
     ) : ForeignTaxDetail {
-
-        companion object {
-            private val WITHHOLDING_TAX_DIVISOR = BigDecimal("0.85")
-        }
 
         private val scale = CurrencyScale.fromCurrency(currency).scale
 
@@ -70,19 +61,11 @@ sealed interface ForeignTaxDetail {
         init {
             foreignNetPayment = ForeignNetPayment.payer(krwRoundedNrFee, exchangeRate, scale)
 
-            val foreignPaymentBeforeTax = foreignNetPayment.value.divideWithScale(WITHHOLDING_TAX_DIVISOR, scale)
-
-            val foreignWithholdingTax = foreignPaymentBeforeTax - foreignNetPayment.value
-
-            foreignIncomeTax = ForeignIncomeTax.payer(
-                foreignWithholdingTax,
-                scale,
-            )
+            foreignIncomeTax = ForeignIncomeTax.payer(foreignNetPayment, scale)
 
             foreignResidentTax = ForeignResidentTax.calculate(foreignIncomeTax, scale)
 
-            foreignTotalPayment =
-                ForeignTotalPayment.payer(foreignNetPayment.value, foreignIncomeTax.value, foreignResidentTax.value)
+            foreignTotalPayment = ForeignTotalPayment.payer(foreignNetPayment, foreignIncomeTax, foreignResidentTax)
         }
     }
 }

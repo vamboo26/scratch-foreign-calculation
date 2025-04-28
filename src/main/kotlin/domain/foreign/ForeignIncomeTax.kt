@@ -12,6 +12,7 @@ value class ForeignIncomeTax private constructor(
     companion object {
 
         private val INCOME_TAX_DIVISOR = BigDecimal("1.1")
+        private val WITHHOLDING_TAX_DIVISOR = BigDecimal("0.85")
 
         fun payee(
             foreignTotalPayment: ForeignTotalPayment,
@@ -25,7 +26,14 @@ value class ForeignIncomeTax private constructor(
             )
         }
 
-        fun payer(foreignWithholdingTax: BigDecimal, scale: Int): ForeignIncomeTax {
+        fun payer(
+            foreignNetPayment: ForeignNetPayment,
+            scale: Int,
+        ): ForeignIncomeTax {
+
+            val foreignPaymentBeforeTax = foreignNetPayment.value.divideWithScale(WITHHOLDING_TAX_DIVISOR, scale)
+            val foreignWithholdingTax = foreignPaymentBeforeTax - foreignNetPayment.value
+
             return ForeignIncomeTax(
                 foreignWithholdingTax
                     .divideWithScale(INCOME_TAX_DIVISOR, scale)

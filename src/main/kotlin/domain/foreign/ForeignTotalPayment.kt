@@ -1,9 +1,6 @@
 package domain.foreign
 
 import domain.divideWithScale
-import domain.krw.KrwIncomeTax
-import domain.krw.KrwNetPayment
-import domain.krw.KrwResidentTax
 import java.math.BigDecimal
 
 @JvmInline
@@ -21,11 +18,11 @@ value class ForeignTotalPayment private constructor(
         }
 
         fun payer(
-            foreignNetPayment: BigDecimal,
-            foreignIncomeTax: BigDecimal,
-            foreignResidentTax: BigDecimal,
+            foreignNetPayment: ForeignNetPayment,
+            foreignIncomeTax: ForeignIncomeTax,
+            foreignResidentTax: ForeignResidentTax,
         ): ForeignTotalPayment {
-            return ForeignTotalPayment(foreignNetPayment + foreignIncomeTax + foreignResidentTax)
+            return ForeignTotalPayment(foreignNetPayment.value + foreignIncomeTax.value + foreignResidentTax.value)
         }
     }
 }
