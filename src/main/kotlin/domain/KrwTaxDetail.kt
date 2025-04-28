@@ -33,9 +33,9 @@ sealed interface KrwTaxDetail {
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwNetPayment = krwTotalPayment.subtract(krwIncomeTax).subtract(krwResidentTax)
+            krwNetPayment = krwTotalPayment - krwIncomeTax - krwResidentTax
 
-            currencyTranslationProfit = krwTotalPayment.subtract(krwRoundedNeighboringCopyrightFee)
+            currencyTranslationProfit = krwTotalPayment - krwRoundedNeighboringCopyrightFee
         }
     }
 
@@ -60,9 +60,9 @@ sealed interface KrwTaxDetail {
 
             krwResidentTax = foreignTaxDetail.foreignResidentTax.multiplyWithScale(foreignTaxDetail.exchangeRate, 0)
 
-            krwTotalPayment = krwNetPayment.add(krwIncomeTax).add(krwResidentTax)
+            krwTotalPayment = krwNetPayment + krwIncomeTax + krwResidentTax
 
-            currencyTranslationProfit = krwNetPayment.subtract(krwRoundedNeighboringCopyrightFee)
+            currencyTranslationProfit = krwNetPayment - krwRoundedNeighboringCopyrightFee
         }
     }
 }

@@ -44,7 +44,7 @@ sealed interface ForeignTaxDetail {
 
             foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
-            foreignNetPayment = foreignTotalPayment.subtract(foreignIncomeTax).subtract(foreignResidentTax)
+            foreignNetPayment = foreignTotalPayment - foreignIncomeTax - foreignResidentTax
         }
     }
 
@@ -72,15 +72,15 @@ sealed interface ForeignTaxDetail {
         init {
             foreignNetPayment = krwRoundedNrFee.divideWithScale(exchangeRate, scale)
 
-            val foreignWithHoldingTax = foreignNetPayment
-                .divideWithScale(WITHHOLDING_TAX_DIVISOR, scale)
-                .subtract(foreignNetPayment)
+            val foreignPaymentBeforeTax = foreignNetPayment.divideWithScale(WITHHOLDING_TAX_DIVISOR, scale)
 
-            foreignIncomeTax = foreignWithHoldingTax.divideWithScale(INCOME_TAX_DIVISOR, scale)
+            val foreignWithholdingTax = foreignPaymentBeforeTax - foreignNetPayment
+
+            foreignIncomeTax = foreignWithholdingTax.divideWithScale(INCOME_TAX_DIVISOR, scale)
 
             foreignResidentTax = foreignIncomeTax.multiplyWithScale(RESIDENT_TAX_MULTIPLIER, scale)
 
-            foreignTotalPayment = foreignNetPayment.add(foreignIncomeTax).add(foreignResidentTax)
+            foreignTotalPayment = foreignNetPayment + foreignIncomeTax + foreignResidentTax
         }
     }
 }
